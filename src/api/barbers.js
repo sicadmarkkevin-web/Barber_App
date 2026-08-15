@@ -6,7 +6,7 @@ export async function getBarberByUsername(username) {
   const { data, error } = await supabase
     .from("barbers")
     .select(
-      "id, username, shop_name, tagline, bio, profile_image_url, cover_image_url, phone, location, facebook_url, instagram_url, tiktok_url, messenger_url, website_url, timezone, plan, account_type"
+      "id, username, shop_name, tagline, bio, profile_image_url, cover_image_url, phone, location, location_lat, location_lng, facebook_url, instagram_url, tiktok_url, messenger_url, website_url, timezone, plan, account_type, booking_settings, paymongo_connected"
     )
     .eq("username", username.toLowerCase())
     .maybeSingle();

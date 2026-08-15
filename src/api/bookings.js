@@ -46,6 +46,7 @@ export async function createBooking({
   customerPhone,
   customerEmail,
   staffId,
+  notes,
 }) {
   const { data, error } = await supabase.rpc("create_booking", {
     p_barber_id: barberId,
@@ -58,6 +59,7 @@ export async function createBooking({
     p_hair_style_id: hairStyleId || null,
     p_reference_photo_url: referencePhotoPath || null,
     p_staff_id: staffId || null,
+    p_notes: notes || null,
   });
   if (error) {
     console.error("createBooking (RPC create_booking) failed:", error);

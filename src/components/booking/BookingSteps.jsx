@@ -263,7 +263,7 @@ export function TimeStep({ loading, slots, error, selectedStart, onSelect }) {
   );
 }
 
-export function DetailsStep({ name, phone, email, errors, onChange }) {
+export function DetailsStep({ name, phone, email, notes, errors, onChange }) {
   return (
     <div>
       <div className="field">
@@ -286,6 +286,16 @@ export function DetailsStep({ name, phone, email, errors, onChange }) {
         <label htmlFor="cust-email">Email (optional)</label>
         <input id="cust-email" type="email" value={email} onChange={(e) => onChange({ email: e.target.value })} />
         {errors.email && <p className="error-text">{errors.email}</p>}
+      </div>
+      <div className="field">
+        <label htmlFor="cust-notes">Notes / special requests (optional)</label>
+        <textarea
+          id="cust-notes"
+          rows={3}
+          value={notes}
+          onChange={(e) => onChange({ notes: e.target.value })}
+          placeholder="Anything the barber should know before your appointment?"
+        />
       </div>
     </div>
   );
@@ -330,7 +340,7 @@ export function PayDepositStep({ barber, service, depositAmount, paying, onPay, 
   );
 }
 
-export function ReviewStep({ barber, staffMember, service, style, photoPreview, date, slot, name, phone, email }) {
+export function ReviewStep({ barber, staffMember, service, style, photoPreview, date, slot, name, phone, email, notes }) {
   const depositAmount = calculateDeposit(service.price, withBookingSettingsDefaults(barber.booking_settings));
   return (
     <div>
@@ -390,6 +400,13 @@ export function ReviewStep({ barber, staffMember, service, style, photoPreview, 
         )}
       </div>
 
+      {notes && (
+        <div className="card" style={{ marginTop: 14 }}>
+          <div className="eyebrow">Notes</div>
+          <p style={{ margin: "8px 0 0", whiteSpace: "pre-wrap" }}>{notes}</p>
+        </div>
+      )}
+
       {depositAmount > 0 ? (
         <>
           <div className="review-line" style={{ marginTop: 14 }}>
@@ -414,7 +431,7 @@ export function ReviewStep({ barber, staffMember, service, style, photoPreview, 
   );
 }
 
-export function SuccessStep({ barber, staffMember, service, style, hasReferencePhoto, date, slot, name, phone }) {
+export function SuccessStep({ barber, staffMember, service, style, hasReferencePhoto, date, slot, name, phone, notes }) {
   const depositAmount = calculateDeposit(service.price, withBookingSettingsDefaults(barber.booking_settings));
   return (
     <div style={{ textAlign: "center", paddingTop: 30 }}>
@@ -476,6 +493,13 @@ export function SuccessStep({ barber, staffMember, service, style, hasReferenceP
           <span>{phone}</span>
         </div>
       </div>
+
+      {notes && (
+        <div className="card" style={{ marginTop: 14, textAlign: "left" }}>
+          <div className="eyebrow">Notes</div>
+          <p style={{ margin: "8px 0 0", whiteSpace: "pre-wrap" }}>{notes}</p>
+        </div>
+      )}
 
       {depositAmount > 0 && (
         <div className="card" style={{ marginTop: 14, textAlign: "left" }}>

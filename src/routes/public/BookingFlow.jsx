@@ -71,6 +71,7 @@ export default function BookingFlow() {
     name: "",
     phone: "",
     email: "",
+    notes: "",
   });
   const [detailErrors, setDetailErrors] = useState({});
 
@@ -316,12 +317,15 @@ export default function BookingFlow() {
         customerPhone: draft.phone.trim(),
         customerEmail: draft.email.trim() || undefined,
         staffId: draft.staffMember?.id,
+        notes: draft.notes.trim() || undefined,
       });
       setCreatedBooking(booking);
 
       const methods = withBookingSettingsDefaults(barber.booking_settings).payment_methods;
       const onlinePaymentAvailable =
-        withBookingSettingsDefaults(barber.booking_settings).online_payments_enabled && (methods.gcash || methods.maya);
+        barber.paymongo_connected &&
+        withBookingSettingsDefaults(barber.booking_settings).online_payments_enabled &&
+        (methods.gcash || methods.maya);
       const needsDeposit = booking.payment_status === "pending" && Number(booking.deposit_amount) > 0;
 
       setStepKey(needsDeposit && onlinePaymentAvailable ? "pay" : "success");
@@ -396,6 +400,7 @@ export default function BookingFlow() {
             slot={draft.slot}
             name={draft.name}
             phone={draft.phone}
+            notes={draft.notes}
           />
           <button className="btn btn-primary" style={{ marginTop: 24 }} onClick={() => navigate(`/${username}`)}>
             Back to barber page
@@ -464,7 +469,14 @@ export default function BookingFlow() {
         )}
 
         {stepKey === "details" && (
-          <DetailsStep name={draft.name} phone={draft.phone} email={draft.email} errors={detailErrors} onChange={updateDetails} />
+          <DetailsStep
+            name={draft.name}
+            phone={draft.phone}
+            email={draft.email}
+            notes={draft.notes}
+            errors={detailErrors}
+            onChange={updateDetails}
+          />
         )}
 
         {stepKey === "review" && (
@@ -479,6 +491,7 @@ export default function BookingFlow() {
             name={draft.name}
             phone={draft.phone}
             email={draft.email}
+            notes={draft.notes}
           />
         )}
       </div>

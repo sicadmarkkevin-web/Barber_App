@@ -126,6 +126,13 @@ function AppointmentDetail({ appt, onClose, onStatusChanged }) {
           </div>
         )}
 
+        {appt.notes && (
+          <div className="card" style={{ marginTop: 14 }}>
+            <div className="eyebrow">Customer notes</div>
+            <p style={{ margin: "8px 0 0", whiteSpace: "pre-wrap" }}>{appt.notes}</p>
+          </div>
+        )}
+
         <div className="card" style={{ marginTop: 14 }}>
           <div className="eyebrow">Appointment</div>
           <div className="review-line">

@@ -30,35 +30,43 @@ export default function BookingSettingsManager() {
     setSettings((prev) => ({ ...prev, ...patch }));
   }
 
-  async function handleSave() {
-    // Dropdowns already constrain values to valid options, but guard anyway
-    // since this configuration is what Phase 3's booking engine will trust.
+  function validateSettings() {
     if (settings.min_advance_minutes < 0 || settings.max_advance_days <= 0 || settings.buffer_minutes < 0) {
       showToast("Couldn't save your booking settings.", "err");
-      return;
+      return false;
     }
     if (settings.deposit_type === "percentage") {
       const pct = Number(settings.deposit_percent);
       if (!(pct > 0) || pct > 100) {
         showToast("Deposit percentage must be between 1 and 100.", "err");
-        return;
+        return false;
       }
     }
     if (settings.deposit_type === "fixed") {
       const amt = Number(settings.deposit_amount);
       if (!(amt >= 0)) {
         showToast("Fixed deposit amount can't be negative.", "err");
-        return;
+        return false;
       }
     }
+    return true;
+  }
 
+  // Preserve existing keys this screen doesn't manage (slot_interval_minutes,
+  // cancellation_notice_hours) by merging into the full stored object.
+  async function persistSettings() {
+    const nextSettings = { ...withBookingSettingsDefaults(barber.booking_settings), ...settings };
+    await updateMyBarberProfile(barber.id, { booking_settings: nextSettings });
+    await refreshBarber();
+  }
+
+  async function handleSave() {
+    // Dropdowns already constrain values to valid options, but guard anyway
+    // since this configuration is what the booking engine will trust.
+    if (!validateSettings()) return;
     setSaving(true);
     try {
-      // Preserve existing keys this screen doesn't manage (slot_interval_minutes,
-      // cancellation_notice_hours) by merging into the full stored object.
-      const nextSettings = { ...withBookingSettingsDefaults(barber.booking_settings), ...settings };
-      await updateMyBarberProfile(barber.id, { booking_settings: nextSettings });
-      await refreshBarber();
+      await persistSettings();
       showToast("Booking settings saved.");
     } catch (err) {
       showToast(err.message || "Couldn't save your booking settings.", "err");
@@ -72,8 +80,15 @@ export default function BookingSettingsManager() {
       showToast("Enter your PayMongo secret key first.", "err");
       return;
     }
+    // "Connect PayMongo" used to be a separate action from "Save booking
+    // settings" — a barber could enable online payments + check GCash/Maya,
+    // click Connect, and never realize those toggles were never actually
+    // saved (only the secret key + connection status were). Connecting now
+    // also persists the current settings, so there's one less step to miss.
+    if (!validateSettings()) return;
     setConnecting(true);
     try {
+      await persistSettings();
       await setPaymongoSecretKey(barber.id, secretKeyInput.trim());
       setSecretKeyInput("");
       await refreshBarber();
@@ -249,7 +264,8 @@ export default function BookingSettingsManager() {
             </span>
           </div>
           <p className="hint-text" style={{ marginTop: 6 }}>
-            Requires connecting your PayMongo account below, and at least one payment method enabled.
+            Requires connecting your PayMongo account below, and at least one payment method checked. Connecting will
+            also save these toggles.
           </p>
         </div>
 
