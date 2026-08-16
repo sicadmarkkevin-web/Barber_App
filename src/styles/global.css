@@ -680,6 +680,34 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
 }
 .appt-section-title:first-child { margin-top: 0; }
 
+.filter-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 14px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.filter-banner-clear {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--brass);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.filter-banner-clear:hover { color: var(--brass-bright); }
+
 .appt-detail-overlay {
   position: fixed;
   inset: 0;
@@ -911,6 +939,14 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   margin-top: 8px;
 }
 .stat-card-hint { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.stat-card-link {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.15s, transform 0.15s;
+  cursor: pointer;
+}
+.stat-card-link:hover { border-color: var(--brass); transform: translateY(-1px); }
 
 .income-card { margin-top: 0; }
 .income-period-toggle {

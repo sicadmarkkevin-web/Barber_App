@@ -158,10 +158,10 @@ export default function DashboardHome() {
       <div className="stat-grid">
         {stats ? (
           <>
-            <StatCard label="Today's appointments" value={stats.today} hint="Upcoming today" icon={CalendarClock} />
-            <StatCard label="Pending" value={stats.pending} hint="Need your attention" icon={Clock} accent="amber" />
-            <StatCard label="Confirmed" value={stats.confirmedToday} hint="Today's confirmed bookings" icon={Check} accent="sage" />
-            <StatCard label="This week" value={stats.thisWeek} hint="Total appointments" icon={CalendarClock} />
+            <StatCard label="Today's appointments" value={stats.today} hint="Upcoming today" icon={CalendarClock} to="/dashboard/appointments?filter=today" />
+            <StatCard label="Pending" value={stats.pending} hint="Need your attention" icon={Clock} accent="amber" to="/dashboard/appointments?filter=pending" />
+            <StatCard label="Confirmed" value={stats.confirmedToday} hint="Today's confirmed bookings" icon={Check} accent="sage" to="/dashboard/appointments?filter=confirmed" />
+            <StatCard label="This week" value={stats.thisWeek} hint="Total appointments" icon={CalendarClock} to="/dashboard/appointments?filter=week" />
           </>
         ) : (
           <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8, color: "var(--muted)" }}>

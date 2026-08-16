@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Camera } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Loader2, Camera, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { listBookingsForBarber, updateBookingStatus, getReferencePhotoUrl } from "../../api/appointments";
 import { formatPHP } from "../../utils/currency";
-import { formatTime12h, formatFriendlyDate } from "../../utils/time";
+import { formatTime12h, formatFriendlyDate, currentWeekRangeISO } from "../../utils/time";
 import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/shared/Toast";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
@@ -20,6 +20,13 @@ const STATUS_LABELS = {
   cancelled: "Cancelled",
   completed: "Completed",
   no_show: "No-show",
+};
+
+const FILTER_LABELS = {
+  today: "Today's appointments",
+  pending: "Pending",
+  confirmed: "Today's confirmed bookings",
+  week: "This week",
 };
 
 function StatusBadge({ status }) {
@@ -276,6 +283,8 @@ function AppointmentCard({ appt, onOpen }) {
 export default function AppointmentsManager() {
   const { barber } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = searchParams.get("filter"); // "today" | "pending" | "confirmed" | "week" | null
   const { toast, showToast } = useToast();
 
   const [bookings, setBookings] = useState(null); // null = loading
@@ -308,6 +317,26 @@ export default function AppointmentsManager() {
     return { today: t, upcoming: u, past: p };
   }, [bookings]);
 
+  const { start: weekStart, end: weekEnd } = useMemo(() => currentWeekRangeISO(), []);
+
+  // Same predicates as the dashboard's stat cards (DashboardHome.jsx), so
+  // whichever number a card shows always matches what you land on here.
+  const filteredList = useMemo(() => {
+    if (!bookings || !filter) return null;
+    const todayISO = todayLocalISO();
+    const live = bookings.filter((b) => b.status !== "cancelled");
+    if (filter === "today") return live.filter((b) => b.date === todayISO);
+    if (filter === "confirmed") return live.filter((b) => b.date === todayISO && b.status === "confirmed");
+    if (filter === "week") return live.filter((b) => b.date >= weekStart && b.date <= weekEnd);
+    if (filter === "pending") {
+      return live
+        .filter((b) => b.status === "pending" && b.date >= todayISO)
+        .slice()
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // most recently booked first
+    }
+    return null;
+  }, [bookings, filter, weekStart, weekEnd]);
+
   function handleStatusChanged(updated) {
     setBookings((prev) => prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)));
     setSelected((prev) => (prev && prev.id === updated.id ? { ...prev, ...updated } : prev));
@@ -322,6 +351,15 @@ export default function AppointmentsManager() {
       <div className="eyebrow">Your bookings</div>
       <h1 style={{ fontSize: 24, marginTop: 6 }}>Appointments</h1>
 
+      {filter && FILTER_LABELS[filter] && (
+        <div className="filter-banner">
+          <span>Showing: {FILTER_LABELS[filter]}</span>
+          <button type="button" className="filter-banner-clear" onClick={() => setSearchParams({})}>
+            <X size={13} /> Clear
+          </button>
+        </div>
+      )}
+
       {bookings === null && !loadError && (
         <p style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 18 }}>
           <Loader2 className="spinner" size={16} /> Loading appointments…
@@ -329,7 +367,17 @@ export default function AppointmentsManager() {
       )}
       {loadError && <p className="error-text" style={{ marginTop: 18 }}>{loadError}</p>}
 
-      {bookings && (
+      {bookings && filter && FILTER_LABELS[filter] && (
+        <div style={{ marginTop: 16 }}>
+          {filteredList.length === 0 ? (
+            <p className="hint-text">Nothing here right now.</p>
+          ) : (
+            filteredList.map((b) => <AppointmentCard key={b.id} appt={b} onOpen={setSelected} />)
+          )}
+        </div>
+      )}
+
+      {bookings && (!filter || !FILTER_LABELS[filter]) && (
         <>
           <div className="appt-section-title">Today</div>
           {today.length === 0 ? <p className="hint-text">No appointments scheduled today.</p> : today.map((b) => <AppointmentCard key={b.id} appt={b} onOpen={setSelected} />)}

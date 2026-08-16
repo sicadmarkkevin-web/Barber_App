@@ -1,7 +1,7 @@
 import { supabase } from "../lib/supabaseClient";
 
 const SELECT_WITH_JOINS = `
-  id, date, start_time, duration_minutes, status, reference_photo_url, notes,
+  id, date, start_time, duration_minutes, status, reference_photo_url, notes, created_at,
   location_type, location_address, location_lat, location_lng,
   total_amount, deposit_type, deposit_value, deposit_amount, remaining_balance,
   payment_status, payment_provider, payment_reference, payment_transaction_id, payment_expires_at, paid_at,
