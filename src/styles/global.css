@@ -692,7 +692,13 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
 
 .dash-shell {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+}
+@media (min-width: 900px) {
+  .dash-shell {
+    flex-direction: row;
+  }
 }
 
 .dash-sidebar {
@@ -745,12 +751,47 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   }
 }
 
+.dash-sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 20px;
+}
+.dash-sidebar-collapsed .dash-sidebar-top {
+  justify-content: center;
+}
 .dash-sidebar-brand {
   font-family: var(--font-display);
   font-size: 20px;
   letter-spacing: 0.08em;
   color: var(--brass-bright);
-  padding: 0 10px 20px;
+}
+.dash-sidebar-toggle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.dash-sidebar-toggle:hover {
+  color: var(--brass-bright);
+  background: var(--surface-raised);
+}
+.dash-sidebar.dash-sidebar-collapsed {
+  width: 76px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.dash-sidebar-collapsed .dash-nav-link {
+  justify-content: center;
+  padding: 10px;
+}
+.dash-sidebar-collapsed .dash-nav-label {
+  display: none;
 }
 .dash-sidebar-nav {
   display: flex;
@@ -832,6 +873,9 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   gap: 12px;
   margin-top: 24px;
 }
+.stat-grid > * {
+  min-width: 0;
+}
 @media (min-width: 640px) {
   .stat-grid { grid-template-columns: repeat(4, 1fr); }
 }
@@ -905,6 +949,12 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   margin-top: 20px;
   align-items: start;
 }
+/* Without this, a grid item defaults to never shrinking below the width of
+   its widest unwrapped content (e.g. the booking-link URL below) — which
+   was forcing the entire dashboard wider than the phone screen. */
+.dash-grid > * {
+  min-width: 0;
+}
 @media (min-width: 1000px) {
   .dash-grid { grid-template-columns: 1.6fr 1fr; }
 }
@@ -924,7 +974,7 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   white-space: nowrap;
 }
 .dash-panel-link:hover { color: var(--brass-bright); }
-.dash-side-col { display: flex; flex-direction: column; gap: 16px; }
+.dash-side-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
 .today-appt-row {
   display: flex;
@@ -953,8 +1003,8 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
-  overflow-x: auto;
-  white-space: nowrap;
+  overflow-wrap: break-word;
+  word-break: break-all;
   color: var(--brass-bright);
 }
 .dash-live-indicator {
@@ -1032,6 +1082,9 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   grid-template-columns: 1fr;
   gap: 12px;
   margin-top: 14px;
+}
+.mgmt-grid > * {
+  min-width: 0;
 }
 @media (min-width: 640px) {
   .mgmt-grid { grid-template-columns: repeat(2, 1fr); }
