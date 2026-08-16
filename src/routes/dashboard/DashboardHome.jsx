@@ -11,6 +11,7 @@ import {
   SlidersHorizontal,
   Users,
   CalendarClock,
+  CalendarCheck,
   CalendarX,
   Camera,
   Loader2,
@@ -84,7 +85,7 @@ export default function DashboardHome() {
     return {
       today: todays.length,
       pending: live.filter((b) => b.status === "pending" && b.date >= today).length,
-      confirmedToday: todays.filter((b) => b.status === "confirmed").length,
+      confirmedUpcoming: live.filter((b) => b.status === "confirmed" && b.date >= today).length,
       thisWeek: live.filter((b) => b.date >= weekStart && b.date <= weekEnd).length,
       todaysList: todays,
     };
@@ -160,7 +161,14 @@ export default function DashboardHome() {
           <>
             <StatCard label="Today's appointments" value={stats.today} hint="Upcoming today" icon={CalendarClock} to="/dashboard/appointments?filter=today" />
             <StatCard label="Pending" value={stats.pending} hint="Need your attention" icon={Clock} accent="amber" to="/dashboard/appointments?filter=pending" />
-            <StatCard label="Confirmed" value={stats.confirmedToday} hint="Today's confirmed bookings" icon={Check} accent="sage" to="/dashboard/appointments?filter=confirmed" />
+            <StatCard
+              label="Calendar of Appointments"
+              value={stats.confirmedUpcoming}
+              hint="Confirmed, upcoming"
+              icon={CalendarCheck}
+              accent="sage"
+              to="/dashboard/calendar"
+            />
             <StatCard label="This week" value={stats.thisWeek} hint="Total appointments" icon={CalendarClock} to="/dashboard/appointments?filter=week" />
           </>
         ) : (

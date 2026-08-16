@@ -284,7 +284,8 @@ export default function AppointmentsManager() {
   const { barber } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const filter = searchParams.get("filter"); // "today" | "pending" | "confirmed" | "week" | null
+  const filter = searchParams.get("filter"); // "today" | "pending" | "confirmed" | "week" | "day" | null
+  const dateParam = searchParams.get("date"); // only used by filter === "day"
   const { toast, showToast } = useToast();
 
   const [bookings, setBookings] = useState(null); // null = loading
@@ -334,8 +335,14 @@ export default function AppointmentsManager() {
         .slice()
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // most recently booked first
     }
+    // From the Calendar of Appointments page — matches exactly what that
+    // calendar counted for this day (confirmed only), sorted by time.
+    if (filter === "day" && dateParam) return live.filter((b) => b.date === dateParam && b.status === "confirmed");
     return null;
-  }, [bookings, filter, weekStart, weekEnd]);
+  }, [bookings, filter, dateParam, weekStart, weekEnd]);
+
+  const filterLabel = filter === "day" && dateParam ? `Confirmed on ${formatFriendlyDate(dateParam)}` : FILTER_LABELS[filter];
+  const isFilteredView = !!filter && !!filterLabel;
 
   function handleStatusChanged(updated) {
     setBookings((prev) => prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)));
@@ -351,9 +358,9 @@ export default function AppointmentsManager() {
       <div className="eyebrow">Your bookings</div>
       <h1 style={{ fontSize: 24, marginTop: 6 }}>Appointments</h1>
 
-      {filter && FILTER_LABELS[filter] && (
+      {isFilteredView && (
         <div className="filter-banner">
-          <span>Showing: {FILTER_LABELS[filter]}</span>
+          <span>Showing: {filterLabel}</span>
           <button type="button" className="filter-banner-clear" onClick={() => setSearchParams({})}>
             <X size={13} /> Clear
           </button>
@@ -367,7 +374,7 @@ export default function AppointmentsManager() {
       )}
       {loadError && <p className="error-text" style={{ marginTop: 18 }}>{loadError}</p>}
 
-      {bookings && filter && FILTER_LABELS[filter] && (
+      {bookings && isFilteredView && (
         <div style={{ marginTop: 16 }}>
           {filteredList.length === 0 ? (
             <p className="hint-text">Nothing here right now.</p>
@@ -377,7 +384,7 @@ export default function AppointmentsManager() {
         </div>
       )}
 
-      {bookings && (!filter || !FILTER_LABELS[filter]) && (
+      {bookings && !isFilteredView && (
         <>
           <div className="appt-section-title">Today</div>
           {today.length === 0 ? <p className="hint-text">No appointments scheduled today.</p> : today.map((b) => <AppointmentCard key={b.id} appt={b} onOpen={setSelected} />)}

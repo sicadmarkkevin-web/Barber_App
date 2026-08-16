@@ -17,6 +17,7 @@ import StylesManager from "./routes/dashboard/StylesManager";
 import HoursManager from "./routes/dashboard/HoursManager";
 import BookingSettingsManager from "./routes/dashboard/BookingSettingsManager";
 import AppointmentsManager from "./routes/dashboard/AppointmentsManager";
+import CalendarOfAppointments from "./routes/dashboard/CalendarOfAppointments";
 import BarberPage from "./routes/public/BarberPage";
 import BookingFlow from "./routes/public/BookingFlow";
 import PaymentReturn from "./routes/public/PaymentReturn";
@@ -56,6 +57,7 @@ export default function App() {
             <Route path="/dashboard/hours" element={<HoursManager />} />
             <Route path="/dashboard/booking-settings" element={<BookingSettingsManager />} />
             <Route path="/dashboard/appointments" element={<AppointmentsManager />} />
+            <Route path="/dashboard/calendar" element={<CalendarOfAppointments />} />
           </Route>
           {/* /customers lands in a later phase as a nested route under /dashboard. */}
 
