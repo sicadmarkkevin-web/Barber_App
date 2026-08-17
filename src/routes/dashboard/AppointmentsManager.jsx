@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Camera, X } from "lucide-react";
+import { ArrowLeft, Loader2, Camera, X, MessageSquare, Phone } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { listBookingsForBarber, updateBookingStatus, getReferencePhotoUrl } from "../../api/appointments";
 import { formatPHP } from "../../utils/currency";
@@ -52,12 +52,60 @@ function PaymentStatusBadge({ status }) {
   return <span className={`status-badge ${display.className}`}>{display.label}</span>;
 }
 
-function AppointmentDetail({ appt, onClose, onStatusChanged }) {
+function AppointmentDetail({ appt, barber, onClose, onStatusChanged }) {
   const { toast, showToast } = useToast();
   const [busy, setBusy] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [photoLoading, setPhotoLoading] = useState(false);
+
+  // Built fresh from THIS appointment every render — nothing cached, no
+  // global/module state, so there's no way a different appointment's
+  // contact details could leak in here (see 0020's earlier customer-reuse
+  // bug for why that matters in this project specifically).
+  const customerPhone = appt.customers?.phone?.trim() || "";
+
+  function buildSmsMessage() {
+    const statusLine =
+      appt.status === "confirmed"
+        ? "Your appointment is confirmed."
+        : appt.status === "completed"
+        ? "Thank you for your visit!"
+        : appt.status === "cancelled"
+        ? "Your appointment has been cancelled."
+        : appt.status === "no_show"
+        ? "We missed you at your appointment — please reach out if you'd like to reschedule."
+        : "Your appointment request has been received.";
+
+    return [
+      `Hi ${appt.customers?.name || "there"}! This is ${barber?.shop_name || "us"}. ${statusLine}`,
+      "",
+      `Service: ${appt.services?.name || ""}`,
+      `Date: ${formatFriendlyDate(appt.date)}`,
+      `Time: ${formatTime12h(appt.start_time)}`,
+      appt.booking_reference ? `Reference: ${appt.booking_reference}` : null,
+      "",
+      "Thank you!",
+    ]
+      .filter((line) => line !== null)
+      .join("\n");
+  }
+
+  function handleMessageCustomer() {
+    if (!customerPhone) {
+      showToast("Customer phone number is unavailable.", "err");
+      return;
+    }
+    window.location.href = `sms:${customerPhone}?body=${encodeURIComponent(buildSmsMessage())}`;
+  }
+
+  function handleCallCustomer() {
+    if (!customerPhone) {
+      showToast("Customer phone number is unavailable.", "err");
+      return;
+    }
+    window.location.href = `tel:${customerPhone}`;
+  }
 
   async function handleSetStatus(status, successMessage) {
     setBusy(true);
@@ -124,6 +172,33 @@ function AppointmentDetail({ appt, onClose, onStatusChanged }) {
               <span>Email</span>
               <span>{appt.customers.email}</span>
             </div>
+          )}
+          <div className="contact-actions">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ flex: 1 }}
+              onClick={handleMessageCustomer}
+              aria-label="Message customer"
+              disabled={!customerPhone}
+            >
+              <MessageSquare size={15} /> Message
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ flex: 1 }}
+              onClick={handleCallCustomer}
+              aria-label="Call customer"
+              disabled={!customerPhone}
+            >
+              <Phone size={15} /> Call
+            </button>
+          </div>
+          {!customerPhone && (
+            <p className="hint-text" style={{ marginTop: 8, marginBottom: 0 }}>
+              Customer phone number is unavailable.
+            </p>
           )}
         </div>
 
@@ -399,7 +474,9 @@ export default function AppointmentsManager() {
         </>
       )}
 
-      {selected && <AppointmentDetail appt={selected} onClose={() => setSelected(null)} onStatusChanged={handleStatusChanged} />}
+      {selected && (
+        <AppointmentDetail appt={selected} barber={barber} onClose={() => setSelected(null)} onStatusChanged={handleStatusChanged} />
+      )}
 
       <Toast toast={toast} />
     </div>

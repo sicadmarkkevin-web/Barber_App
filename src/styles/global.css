@@ -703,6 +703,11 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
   color: var(--brass);
   margin-top: 4px;
 }
+.contact-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
 .appt-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
 .status-badge {
