@@ -143,7 +143,7 @@ export default function DashboardHome() {
           <h1 className="dash-header-title">
             {greeting()}, {firstName}.
           </h1>
-          <p className="dash-header-subtitle">Manage your bookings and barber business from one place.</p>
+          <p className="dash-header-subtitle">Manage your bookings and business from one place.</p>
         </div>
         <div className="dash-header-actions">
           <a href={bookingLink} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ width: "auto", padding: "9px 14px" }}>

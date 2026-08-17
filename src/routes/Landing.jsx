@@ -17,7 +17,7 @@ export default function Landing() {
               className="btn btn-primary"
               style={{ width: "auto", padding: "9px 16px" }}
             >
-              Get your page
+              Get your business page
             </Link>
           </div>
         </nav>
@@ -25,9 +25,9 @@ export default function Landing() {
 
       <main style={{ flex: 1, display: "flex", alignItems: "center" }}>
         <div className="container-wide" style={{ paddingTop: 40, paddingBottom: 60 }}>
-          <div className="eyebrow">One link. One barber. Every booking.</div>
+          <div className="eyebrow">One link. One business. Every booking.</div>
           <h1 style={{ fontSize: "clamp(34px, 6vw, 58px)", maxWidth: 680, marginTop: 14 }}>
-            Every barber gets their own booking page.
+            Your business, your booking page.
           </h1>
           <p style={{ maxWidth: 520, fontSize: 16.5, marginTop: 16 }}>
             Set your services, your prices, your hours, your styles. Get a link you can drop
@@ -36,7 +36,7 @@ export default function Landing() {
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
             <Link to="/signup" className="btn btn-primary" style={{ width: "auto", padding: "13px 22px" }}>
-              Create your page <ArrowRight size={16} />
+              Create your business page <ArrowRight size={16} />
             </Link>
           </div>
 
@@ -50,8 +50,8 @@ export default function Landing() {
             }}
           >
             {[
-              ["01", "Set up your page", "Services, prices, hours, and haircut styles — five minutes, no code."],
-              ["02", "Share your link", "yourapp.com/yourname — drop it anywhere you already post."],
+              ["01", "Set up your page", "Services, prices, hours, staff and styles — five minutes, no code."],
+              ["02", "Share your link", "alora-ps.vercel.app/yourname — drop it anywhere you already post."],
               ["03", "Take bookings", "Customers pick a service and time, you get notified. That's it."],
             ].map(([n, title, body]) => (
               <div className="card" key={n}>

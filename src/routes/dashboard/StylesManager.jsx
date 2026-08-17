@@ -193,7 +193,7 @@ export default function StylesManager() {
       </button>
 
       <div className="eyebrow">Your public page</div>
-      <h1 style={{ fontSize: 24, marginTop: 6 }}>Haircut styles</h1>
+      <h1 style={{ fontSize: 24, marginTop: 6 }}>Styles/Choices</h1>
 
       {styles === null && !loadError && (
         <p style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 18 }}>
