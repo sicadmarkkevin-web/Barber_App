@@ -111,6 +111,7 @@ function AppointmentDetail({ appt, onClose, onStatusChanged }) {
         <h1 style={{ fontSize: 22, marginTop: 18 }}>
           {formatFriendlyDate(appt.date)} · {formatTime12h(appt.start_time)}
         </h1>
+        {appt.booking_reference && <div className="appt-detail-ref">{appt.booking_reference}</div>}
 
         <div className="card" style={{ marginTop: 16 }}>
           <div className="eyebrow">Customer</div>
@@ -263,6 +264,7 @@ function AppointmentCard({ appt, onOpen }) {
     <button type="button" className="appt-card" onClick={() => onOpen(appt)}>
       <span className="appt-time">{formatTime12h(appt.start_time)}</span>
       <span className="appt-body">
+        {appt.booking_reference && <div className="appt-ref">{appt.booking_reference}</div>}
         <div className="appt-customer">{appt.customers?.name || "Customer"}</div>
         <div className="appt-meta">
           {appt.services?.name} · {formatPHP(appt.services?.price)}

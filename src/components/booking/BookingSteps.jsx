@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { Loader2, Check, Scissors, Camera, User } from "lucide-react";
+import { useRef, useState } from "react";
+import { Loader2, Check, Scissors, Camera, User, Copy, Share2 } from "lucide-react";
 import { formatPHP } from "../../utils/currency";
 import { withBookingSettingsDefaults, calculateDeposit } from "../../utils/bookingSettings";
 import HairIcon from "../shared/HairIcon";
@@ -431,8 +431,46 @@ export function ReviewStep({ barber, staffMember, service, style, photoPreview, 
   );
 }
 
-export function SuccessStep({ barber, staffMember, service, style, hasReferencePhoto, date, slot, name, phone, notes }) {
+export function SuccessStep({ barber, staffMember, service, style, hasReferencePhoto, date, slot, name, phone, notes, bookingReference }) {
   const depositAmount = calculateDeposit(service.price, withBookingSettingsDefaults(barber.booking_settings));
+  const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  const shareText = `My appointment at ${barber.shop_name}\n\nReference: ${bookingReference}\nService: ${service.name}\n${date ? `Date: ${formatFriendlyDate(date)}\n` : ""}${slot ? `Time: ${slot.label}` : ""}`;
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(bookingReference);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (older browser, insecure context, or
+      // permission denied) — graceful no-op rather than a broken button;
+      // the reference is already shown as plain selectable text above.
+    }
+  }
+
+  async function handleShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Appointment at ${barber.shop_name}`, text: shareText });
+      } catch {
+        // Share sheet dismissed/cancelled by the person — not an error.
+      }
+      return;
+    }
+    // No Web Share API support: fall back to copying the same summary text
+    // instead of leaving the button non-functional.
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
+    } catch {
+      // Nothing more we can do here — the reference itself is still visible
+      // and copyable on its own.
+    }
+  }
+
   return (
     <div style={{ textAlign: "center", paddingTop: 30 }}>
       <div
@@ -451,6 +489,24 @@ export function SuccessStep({ barber, staffMember, service, style, hasReferenceP
       </div>
       <h1 style={{ fontSize: 24, marginTop: 18 }}>Booking confirmed!</h1>
       <p style={{ marginTop: 6 }}>Your barber has received your appointment details.</p>
+
+      {bookingReference && (
+        <div className="card" style={{ marginTop: 20 }}>
+          <div className="eyebrow">Appointment reference</div>
+          <div className="booking-ref">{bookingReference}</div>
+          <p className="hint-text" style={{ marginTop: 6 }}>
+            Please save this reference. You may show it to the business when you arrive.
+          </p>
+          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+            <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={handleCopy}>
+              <Copy size={15} /> {copied ? "Copied!" : "Copy reference"}
+            </button>
+            <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={handleShare}>
+              <Share2 size={15} /> {shared ? "Copied!" : "Share"}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="card" style={{ marginTop: 20, textAlign: "left" }}>
         <div className="eyebrow">{barber.shop_name}</div>

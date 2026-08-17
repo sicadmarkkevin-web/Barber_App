@@ -568,6 +568,16 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
 }
 .review-line:last-child { border-bottom: none; }
 
+.booking-ref {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--brass-bright);
+  margin-top: 8px;
+  word-break: break-all;
+}
+
 /* ---------- calendar (ported from the original Alora app) ---------- */
 
 .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -679,6 +689,20 @@ input[type="time"]:focus-visible { border-color: var(--brass); outline: 2px soli
 }
 .appt-body { flex: 1; min-width: 0; }
 .appt-customer { font-weight: 600; }
+.appt-ref {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--brass);
+  margin-bottom: 2px;
+}
+.appt-detail-ref {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--brass);
+  margin-top: 4px;
+}
 .appt-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
 .status-badge {

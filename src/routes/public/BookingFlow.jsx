@@ -401,6 +401,7 @@ export default function BookingFlow() {
             name={draft.name}
             phone={draft.phone}
             notes={draft.notes}
+            bookingReference={createdBooking?.booking_reference}
           />
           <button className="btn btn-primary" style={{ marginTop: 24 }} onClick={() => navigate(`/${username}`)}>
             Back to barber page
