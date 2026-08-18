@@ -380,6 +380,16 @@ export default function AppointmentsManager() {
     };
   }, [barber]);
 
+  // From a notification click (see DashboardLayout) — opens the exact
+  // booking the notification referenced, reusing this existing detail
+  // modal rather than a new route/architecture.
+  const highlightId = searchParams.get("highlight");
+  useEffect(() => {
+    if (!bookings || !highlightId) return;
+    const match = bookings.find((b) => b.id === highlightId);
+    if (match) setSelected(match);
+  }, [bookings, highlightId]);
+
   const { today, upcoming, past } = useMemo(() => {
     if (!bookings) return { today: [], upcoming: [], past: [] };
     const todayISO = todayLocalISO();

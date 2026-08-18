@@ -347,7 +347,7 @@ export default function DashboardHome() {
           <ManagementCard
             icon={Images}
             title="Styles"
-            description="Manage haircut styles and portfolio images."
+            description="Manage styles/options and portfolio images."
             to="/dashboard/styles"
             actionLabel="Manage styles"
           />

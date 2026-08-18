@@ -2,8 +2,9 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X, ExternalLink, LogOut } from "lucide-react";
 import { NAV_ITEMS } from "./navItems";
+import NotificationBell from "./NotificationBell";
 
-export default function MobileDashboardNav({ barber, onSignOut }) {
+export default function MobileDashboardNav({ barber, onSignOut, notifications, unreadCount, onOpenNotification, onMarkAllRead }) {
   const [open, setOpen] = useState(false);
   const items = NAV_ITEMS.filter((item) => !item.shopOnly || barber?.account_type === "shop");
   const bookingLink = `${window.location.origin}/${barber?.username}`;
@@ -12,9 +13,17 @@ export default function MobileDashboardNav({ barber, onSignOut }) {
     <>
       <div className="dash-mobile-header">
         <span className="dash-mobile-brand">ALORA</span>
-        <button type="button" className="icon-btn" aria-label="Open menu" onClick={() => setOpen(true)}>
-          <Menu size={20} />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onOpenNotification={onOpenNotification}
+            onMarkAllRead={onMarkAllRead}
+          />
+          <button type="button" className="icon-btn" aria-label="Open menu" onClick={() => setOpen(true)}>
+            <Menu size={20} />
+          </button>
+        </div>
       </div>
 
       {open && (
