@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Bell } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { updateMyBarberProfile } from "../../api/barbers";
 import {
@@ -12,6 +12,13 @@ import {
 } from "../../utils/bookingSettings";
 import { formatPHP } from "../../utils/currency";
 import { setPaymongoSecretKey, disconnectPaymongo } from "../../api/paymentProvider";
+import {
+  isPushSupported,
+  getPushPermissionState,
+  getCurrentDeviceSubscription,
+  enablePushNotifications,
+  disablePushNotifications,
+} from "../../api/pushSubscriptions";
 import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/shared/Toast";
 
@@ -25,6 +32,47 @@ export default function BookingSettingsManager() {
   const [secretKeyInput, setSecretKeyInput] = useState("");
   const [connecting, setConnecting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+
+  // Per-device state — a barber may have push enabled on their phone but
+  // not their laptop, so this reflects THIS browser only, not the barber
+  // account as a whole (push_subscriptions can hold several rows per barber).
+  const [pushSupported] = useState(isPushSupported());
+  const [pushPermission, setPushPermission] = useState(getPushPermissionState());
+  const [pushEnabledHere, setPushEnabledHere] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  useEffect(() => {
+    if (!pushSupported) return;
+    getCurrentDeviceSubscription().then((sub) => setPushEnabledHere(!!sub));
+  }, [pushSupported]);
+
+  async function handleEnablePush() {
+    setPushBusy(true);
+    try {
+      await enablePushNotifications(barber.id);
+      setPushEnabledHere(true);
+      setPushPermission(getPushPermissionState());
+      showToast("Booking notifications enabled on this device.");
+    } catch (err) {
+      showToast(err.message || "Couldn't enable notifications.", "err");
+      setPushPermission(getPushPermissionState());
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
+  async function handleDisablePush() {
+    setPushBusy(true);
+    try {
+      await disablePushNotifications();
+      setPushEnabledHere(false);
+      showToast("Booking notifications disabled on this device.");
+    } catch (err) {
+      showToast(err.message || "Couldn't disable notifications.", "err");
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   function update(patch) {
     setSettings((prev) => ({ ...prev, ...patch }));
@@ -387,6 +435,52 @@ export default function BookingSettingsManager() {
               <button className="btn btn-primary" style={{ marginTop: 10 }} onClick={handleConnect} disabled={connecting}>
                 {connecting ? <Loader2 className="spinner" size={16} /> : null}
                 {connecting ? "Connecting…" : "Connect PayMongo"}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="eyebrow" style={{ marginTop: 24, marginBottom: 14 }}>Notifications</div>
+      <div className="card">
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Bell size={16} /> Booking notifications
+          </label>
+          <p className="hint-text" style={{ marginTop: 4, marginBottom: 12 }}>
+            Get notified on this device when a customer books an appointment — even when the dashboard isn't open.
+          </p>
+
+          {!pushSupported && (
+            <p className="hint-text" style={{ margin: 0 }}>
+              This browser doesn't support push notifications. You'll still see new bookings in the notification
+              bell whenever the dashboard is open.
+            </p>
+          )}
+
+          {pushSupported && pushPermission === "denied" && (
+            <p className="hint-text" style={{ margin: 0 }}>
+              Notifications are blocked for this site in your browser settings. Allow notifications for this site,
+              then reload this page to enable them here.
+            </p>
+          )}
+
+          {pushSupported && pushPermission !== "denied" && !pushEnabledHere && (
+            <button className="btn btn-primary" onClick={handleEnablePush} disabled={pushBusy}>
+              {pushBusy ? <Loader2 className="spinner" size={16} /> : <Bell size={15} />}
+              {pushBusy ? "Enabling…" : "Enable notifications"}
+            </button>
+          )}
+
+          {pushSupported && pushEnabledHere && (
+            <>
+              <p style={{ margin: "0 0 10px", display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--sage)", display: "inline-block" }} />
+                Booking notifications enabled on this device
+              </p>
+              <button className="btn btn-ghost" onClick={handleDisablePush} disabled={pushBusy}>
+                {pushBusy ? <Loader2 className="spinner" size={16} /> : null}
+                {pushBusy ? "Disabling…" : "Disable notifications"}
               </button>
             </>
           )}
