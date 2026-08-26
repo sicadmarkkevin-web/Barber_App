@@ -100,6 +100,20 @@ label {
 
 .field { margin-bottom: 16px; }
 
+.location-map-picker {
+  width: 100%;
+  height: 260px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  /* Leaflet's own controls (zoom buttons, attribution) use plain black/white
+     by default — fine on a map, left untouched rather than fighting Leaflet's
+     internal styles to force them into the app's dark palette. */
+}
+@media (min-width: 640px) {
+  .location-map-picker { height: 320px; }
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"],

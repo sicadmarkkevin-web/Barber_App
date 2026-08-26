@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Camera, Facebook, Instagram, MessageCircle, Globe, ArrowLeft } from "lucide-react";
+import { Loader2, Camera, Facebook, Instagram, MessageCircle, Globe, ArrowLeft, MapPin } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { updateMyBarberProfile } from "../../api/barbers";
 import { uploadImage } from "../../utils/image";
 import { validateOptionalUrl } from "../../utils/urlValidation";
+import { getCurrentPosition } from "../../utils/geolocation";
+import LocationMapPicker from "../../components/dashboard/LocationMapPicker";
 import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/shared/Toast";
 
@@ -26,6 +28,11 @@ export default function EditProfile() {
   const [shopName, setShopName] = useState(barber?.shop_name || "");
   const [bio, setBio] = useState(barber?.bio || "");
   const [phone, setPhone] = useState(barber?.phone || "");
+  const [location, setLocation] = useState(barber?.location || "");
+  const [locationLat, setLocationLat] = useState(barber?.location_lat ?? null);
+  const [locationLng, setLocationLng] = useState(barber?.location_lng ?? null);
+  const [geoStatus, setGeoStatus] = useState("idle"); // "idle" | "loading" | "granted" | "error"
+  const [geoError, setGeoError] = useState("");
   const [facebookUrl, setFacebookUrl] = useState(barber?.facebook_url || "");
   const [instagramUrl, setInstagramUrl] = useState(barber?.instagram_url || "");
   const [tiktokUrl, setTiktokUrl] = useState(barber?.tiktok_url || "");
@@ -59,6 +66,21 @@ export default function EditProfile() {
     }
     setPendingFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+  }
+
+  async function handleUseCurrentLocation() {
+    setGeoStatus("loading");
+    setGeoError("");
+    try {
+      const { lat, lng } = await getCurrentPosition();
+      setLocationLat(lat);
+      setLocationLng(lng);
+      setGeoStatus("granted");
+    } catch (err) {
+      console.error("Geolocation failed:", err);
+      setGeoStatus("error");
+      setGeoError(err?.message || "Couldn't determine your location. Please enter your address manually.");
+    }
   }
 
   function validate() {
@@ -111,6 +133,9 @@ export default function EditProfile() {
         shop_name: shopName.trim(),
         bio: bio.trim(),
         phone: phone.trim(),
+        location: location.trim() || null,
+        location_lat: locationLat,
+        location_lng: locationLng,
         facebook_url: normalized.fb.value,
         instagram_url: normalized.ig.value,
         tiktok_url: normalized.tt.value,
@@ -179,6 +204,57 @@ export default function EditProfile() {
         <div className="field">
           <label htmlFor="phone">Phone</label>
           <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={busy} placeholder="09XXXXXXXXX" />
+        </div>
+
+        <div className="eyebrow" style={{ marginTop: 6, marginBottom: 14 }}>Business location</div>
+
+        <div className="field">
+          <label htmlFor="location">Business address</label>
+          <input
+            id="location"
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            disabled={busy}
+            placeholder="123 Example Street, Marikina City"
+          />
+          <p className="hint-text" style={{ marginTop: 6 }}>Shown on your public page, and used for "at the barber shop" bookings.</p>
+        </div>
+
+        <div className="field">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            style={{ width: "auto", padding: "9px 14px" }}
+            onClick={handleUseCurrentLocation}
+            disabled={busy || geoStatus === "loading"}
+          >
+            {geoStatus === "loading" ? <Loader2 className="spinner" size={15} /> : <MapPin size={15} />}
+            {geoStatus === "loading" ? "Getting location…" : "Use my current location"}
+          </button>
+          {locationLat != null && locationLng != null && geoStatus !== "error" && (
+            <p className="hint-text" style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6 }}>
+              <MapPin size={13} /> Location captured — used for "Open in Google Maps" on your page.
+            </p>
+          )}
+          {geoStatus === "error" && <p className="error-text">{geoError}</p>}
+        </div>
+
+        <div className="field">
+          <label>Or pick it on the map</label>
+          <p className="hint-text" style={{ marginTop: 4, marginBottom: 10 }}>
+            Tap anywhere on the map, or drag the pin, to set your exact location.
+          </p>
+          <LocationMapPicker
+            lat={locationLat}
+            lng={locationLng}
+            onChange={(lat, lng) => {
+              setLocationLat(lat);
+              setLocationLng(lng);
+              setGeoStatus("granted");
+              setGeoError("");
+            }}
+          />
         </div>
 
         <div className="eyebrow" style={{ marginTop: 6, marginBottom: 14 }}>Social links (all optional)</div>
